@@ -32,4 +32,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'id_role', 'id');
     }
+
+    public function akses()
+    {
+        return $this->hasMany(Akses::class, 'id_role', 'id_role');
+    }
 }

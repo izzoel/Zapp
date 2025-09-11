@@ -21,4 +21,10 @@ class LandingController extends Controller
             return response()->json(['success' => false, 'message' => 'Gagal']);
         }
     }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return redirect()->route('landing');
+    }
 }

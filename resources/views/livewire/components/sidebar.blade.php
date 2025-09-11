@@ -39,13 +39,17 @@
             @endphp
 
             @foreach ($children as $child)
-                <li class="menu-item">
-                    <a wire:navigate href="{{ $child->segment ?? '#' }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx {{ $child->icon ?? 'bx-circle' }}"></i>
-                        <div>{{ $child->menu }}</div>
-                    </a>
-                </li>
+                @if (Gate::check('r', $child->segment))
+                    <li class="menu-item">
+                        <a wire:navigate href="{{ $child->segment ?? '#' }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx {{ $child->icon ?? 'bx-circle' }}"></i>
+                            <div>{{ $child->menu }}</div>
+                        </a>
+                    </li>
+                @endif
             @endforeach
         @endforeach
     </ul>
+
+
 </aside>

@@ -22,17 +22,18 @@ return new class extends Migration {
         });
 
         DB::table('menus')->insert([
-            [
-                'id' => 1,
-                'urutan' => 0,
-                'menu' => 'Setting',
-                'segment' => 'setting',
-                'icon' => null,
-                'permission_view' => null,
-                'parent_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            'id' => 1,
+            'urutan' => 0,
+            'menu' => 'Setting',
+            'segment' => 'setting',
+            'icon' => null,
+            'permission_view' => null,
+            'parent_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('menus')->insert([
             [
                 'id' => 2,
                 'urutan' => 0,
@@ -51,11 +52,10 @@ return new class extends Migration {
                 'segment' => 'menu',
                 'icon' => 'bx-menu',
                 'permission_view' => null,
-                'parent_id' => 0,
+                'parent_id' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
             [
                 'id' => 4,
                 'urutan' => 0,
@@ -67,7 +67,6 @@ return new class extends Migration {
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
             [
                 'id' => 5,
                 'urutan' => 0,
