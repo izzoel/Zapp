@@ -14,6 +14,7 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('avatar');
             $table->string('name');
             $table->string('password');
             $table->foreignId('id_role')->constrained('roles')->onDelete('cascade');
@@ -22,6 +23,7 @@ return new class extends Migration {
 
         DB::table('users')->insert([
             'id' => 1,
+            'avatar' => rand(0, 11) . '.png',
             'name' => 'admin',
             'password' => Hash::make('nimda'),
             'id_role' => 1,
