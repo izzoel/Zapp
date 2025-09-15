@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        DB::table('akses')->insert(
+        DB::table('akses')->insert([
             [
                 'id' => 1,
                 'id_menu' => 2,
@@ -67,7 +67,7 @@ return new class extends Migration {
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        );
+        ]);
     }
 
     /**
