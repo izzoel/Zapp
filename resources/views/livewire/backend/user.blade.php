@@ -31,8 +31,10 @@
                         <thead>
                             <tr class="text-center">
                                 <th class="col-1">#</th>
+                                <th class="col-1">Avatar</th>
                                 <th class="col-auto text-start">Username</th>
                                 <th class="col-2 text-start">Role</th>
+                                <th class="col-1">Password</th>
                                 <th class="col-1">Aksi</th>
                             </tr>
                         </thead>
@@ -40,6 +42,7 @@
                             @if ($tampil_tambah)
                                 <tr class="text-center" style="background-color: rgb(133 146 163 / 60%);">
                                     <td>{{ $index }}</td>
+                                    <td><img src="" alt=""></td>
                                     <td class="text-start">
                                         <input wire:model="name" type="text"
                                             class="form-control form-control-md {{ $errors->has('name') ? 'is-invalid' : 'border border-secondary' }}" placeholder="username..">
@@ -70,7 +73,16 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <td>
+                                        <input wire:model="name" type="text"
+                                            class="form-control form-control-md {{ $errors->has('name') ? 'is-invalid' : 'border border-secondary' }}" placeholder="username..">
 
+                                        <div class="invalid-feedback">
+                                            @error('name')
+                                                {{ $message }}
+                                            @enderror
+                                        </div>
+                                    </td>
                                     <td>
                                         <button onclick="simpanPengguna()" type="button" class="btn btn-sm btn-primary rounded-1">
                                             <strong>Simpan</strong>
@@ -83,6 +95,9 @@
                                 <tr class="text-center">
                                     <td>
                                         {{ $loop->iteration }}
+                                    </td>
+                                    <td>
+                                        <img src="{{ asset('img/avatars/' . $pengguna->avatar) }}" alt="avatar-{{ $pengguna->avatar }}" class="w-px-40 h-auto rounded-circle">
                                     </td>
                                     <td class="text-start" x-data>
                                         @if ($editFieldRowId == $pengguna->id . '-name')
@@ -119,6 +134,12 @@
                                                 <i class="bx bx-edit-alt text-warning icon-hover"></i>
                                             </div>
                                         @endif
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button onclick="konfirmasiHapus({{ $pengguna->id }}, '{{ $pengguna->name }}')" type="button"
+                                                class="btn btn-sm btn-primary rounded-1"><strong>Reset</strong></button>
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="dropdown">
