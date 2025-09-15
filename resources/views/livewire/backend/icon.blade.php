@@ -133,6 +133,12 @@
                         </div>
                         <div class="card icon-card cursor-pointer text-center mb-4 mx-2">
                             <div class="card-body">
+                                <i class="bx bx-form mb-2"></i>
+                                <p class="icon-name text-capitalize text-truncate mb-0">form</p>
+                            </div>
+                        </div>
+                        <div class="card icon-card cursor-pointer text-center mb-4 mx-2">
+                            <div class="card-body">
                                 <i class="bx bx-circle-hexagon mb-2"></i>
                                 <p class="icon-name text-capitalize text-truncate mb-0">circle</p>
                             </div>
