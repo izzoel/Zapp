@@ -22,25 +22,6 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Register any authentication / authorization services.
      */
-    // public function boot(): void
-    // {
-    //     //
-    // }
-
-    // public function boot()
-    // {
-    //     // Gate untuk permission "read" (r)
-    //     Gate::define('r', function ($user) {
-    //         $segment = Request::segment(1); // ambil segment pertama dari URL
-
-    //         return Akses::where('id_role', $user->id_role)
-    //             ->whereHas('menu', function ($query) use ($segment) {
-    //                 $query->where('segment', $segment); // pastikan tabel menu punya kolom 'segment'
-    //             })
-    //             ->where('read', 1)
-    //             ->exists();
-    //     });
-    // }
 
     public function boot()
     {
