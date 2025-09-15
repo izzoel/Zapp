@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Backend;
 
+use App\Models\Akses as ModelAkses;
 use App\Models\Menu as ModelMenu;
+use App\Models\User as ModelUser;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\On;
@@ -42,7 +44,6 @@ class Menu extends Component
     public function mount()
     {
         $this->semuaMenu = ModelMenu::all();
-        $this->disabledDelete = in_array(request()->segment(1), ['menu', 'akses', 'role', 'user']);
     }
 
     public function render()
@@ -80,6 +81,15 @@ class Menu extends Component
             'segment' => $this->segment,
             'icon' => $this->icon,
             'parent_id' => $this->parent_id,
+        ]);
+
+        ModelAkses::create([
+            'id_menu' => ModelMenu::where('segment', $this->segment)->first()->id,
+            'id_role' => auth()->user()->id_role,
+            'create' => 1,
+            'read' => 1,
+            'update' => 1,
+            'delete' => 1,
         ]);
 
         if (!empty($this->segment)) {

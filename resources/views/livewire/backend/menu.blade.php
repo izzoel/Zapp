@@ -287,7 +287,8 @@
                                         </td>
                                         <td>
                                             <button onclick="konfirmasiHapus({{ $child->id }}, '{{ 'Menu ' . addslashes($child->menu) }}')" type="button"
-                                                class="btn btn-sm btn-danger rounded-1" @if ($disabledDelete) disabled @endif>
+                                                class="btn btn-sm btn-danger rounded-1"
+                                                @if(in_array(strtolower($child->menu), ['menu','akses','role','user'])) disabled @endif>
                                                 <strong>Hapus</strong>
                                             </button>
                                         </td>
