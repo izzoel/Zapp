@@ -23,21 +23,23 @@
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow" href="" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        <img src="{{ asset('img/avatars/0.png') }}" alt class="w-px-40 h-auto rounded-circle" />
+                        <img src="{{ asset('img/avatars/' . (auth()->user()->avatar ?? '0.png')) }}" alt="avatar-{{ auth()->user()->avatar ?? '0.png' }}"
+                            class="w-px-40 h-auto rounded-circle" />
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ url('user') }}">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img src="" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="{{ asset('img/avatars/' . (auth()->user()->avatar ?? '0.png')) }}" alt="avatar-{{ auth()->user()->avatar ?? '0.png' }}"
+                                            class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="fw-semibold d-block"></span>
-                                    <small class="text-muted"></small>
+                                    <span class="fw-semibold d-block">{{ ucfirst(auth()->user()->name) }}</span>
+                                    <small class="text-muted">{{ auth()->user()->role->role }}</small>
                                 </div>
                             </div>
                         </a>
@@ -46,27 +48,17 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="U_B_profil dropdown-item" href="" data-id="">
-                            <i class="bx bx-user me-2"></i>
-                            <span class="align-middle">My Profile</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="">
-                            <i class="bx bx-credit-card me-2"></i>
-                            <span class="align-middle">Riwayat</span>
-                            @guest
-                                <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">
-                                </span>
-                            @endguest
+                        <a class=" dropdown-item d-inline-flex align-items-center" href="{{ url('user') }}">
+                            <i class="menu-icon tf-icons bx bx-cog me-2"></i>
+                            <span>Pengaturan</span>
                         </a>
                     </li>
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="">
-                            <i class="bx bx-power-off me-2"></i>
+                        <a class="dropdown-item  d-inline-flex align-items-center" href="{{ route('logout') }}">
+                            <i class="menu-icon tf-icons bx bx-door-open me-2"></i>
                             <span class="align-middle">Log Out</span>
                         </a>
                     </li>
