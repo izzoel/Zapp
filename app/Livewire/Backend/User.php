@@ -6,13 +6,16 @@ use App\Models\Role as ModelRole;
 use App\Models\User as ModelUser;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Rule;
 
 class User extends Component
 {
-    public $editFieldRowId;
-    public $index, $name, $role;
+    use WithFileUploads;
+
+    public $editFieldRowId, $customAvatar;
+    public $index, $fallback, $avatars, $name, $role;
 
     public bool $tampil_tambah = false;
 
@@ -28,11 +31,16 @@ class User extends Component
 
     public function render()
     {
-        $data['roles'] = ModelRole::all();
-        $data['penggunas'] = ModelUser::all();
+        $data['avatars'] = [];
         $data['fallback'] = class_basename(ModelUser::class);
+        $data['penggunas'] = ModelUser::all();
+        $data['roles'] = ModelRole::all();
 
-        return view('livewire.backend.user', $data);
+        for ($i = 0; $i <= 9; $i++) {
+            $data['avatars'][] = $i + 1 . '.png';
+        }
+
+        return view('livewire.backend.user', compact('data'));
     }
 
     public function tambah()
@@ -49,13 +57,50 @@ class User extends Component
             return;
         }
 
-        $data->update([
-            $field => $value,
-        ]);
+        if ($field === 'password') {
+            $data->update([
+                'password' => Hash::make($value),
+            ]);
+            $this->dispatch('toast_success', 'Password berhasil diubah');
+        } else {
+            $data->update([
+                $field => $value,
+            ]);
+            $this->dispatch('toast_success', $this->name . ' berhasil diubah');
+            $this->reset(['tampil_tambah', 'name']);
+        }
 
         $this->editFieldRowId = null;
-        $this->dispatch('toast_success', $this->name . ' berhasil diubah.');
-        $this->reset(['tampil_tambah', 'name']);
+    }
+
+    public function ubahAvatar($avatar)
+    {
+        $data = ModelUser::find(auth()->user()->id);
+        $data->update([
+            'avatar' => $avatar,
+        ]);
+
+        $this->dispatch('toast_success', 'Avatar berhasil diubah.');
+        $this->dispatch('close_modal');
+    }
+
+    public function updatedCustomAvatar()
+    {
+        $this->validate([
+            'customAvatar' => 'required|image|max:2048',
+        ]);
+
+        // Simpan file ke storage/public/img/avatars
+        $filename = 'custom-' . auth()->user()->name . '.' . $this->customAvatar->getClientOriginalExtension();
+        $this->customAvatar->storeAs('img/avatars/' . auth()->user()->name, $filename, 'public');
+
+        $data = ModelUser::find(auth()->user()->id);
+        $data->update([
+            'avatar' => $filename,
+        ]);
+
+        $this->dispatch('toast_success', 'Avatar berhasil diubah.');
+        $this->dispatch('close_modal');
     }
 
     public function editRow($id, $field, $value)

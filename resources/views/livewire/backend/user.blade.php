@@ -14,13 +14,38 @@
         .edit-icon:hover .icon-hover {
             opacity: 1;
         }
+
+        /* Lingkaran upload dasar */
+        .upload-plus {
+            /* background-color: #0d6efd; */
+            /* Biru Bootstrap */
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .avatar-option {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Hover: membesar dan bayangan */
+        .avatar-option:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-color: #0d6efd;
+            /* Biru Bootstrap */
+        }
+
+        /* Active (klik): mengecil sedikit */
+        .avatar-option:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+        }
     </style>
 @endpush
 
 <div>
     <h4 class="fw-bold py-3 mb-2">
         <span class="text-muted fw-light">Setting /</span>
-        {{ strtolower(Request::segment(1)) === 'livewire' ? $fallback : ucfirst(Request::segment(1)) }}
+        {{ strtolower(Request::segment(1)) === 'livewire' ? $data['fallback'] : ucfirst(Request::segment(1)) }}
         <button wire:click="tambah" type="button" class="btn btn-xs btn-primary rounded-1"><strong>&#10010;</strong></button>
     </h4>
     <div class="row">
@@ -34,7 +59,7 @@
                                 <th class="col-1">Avatar</th>
                                 <th class="col-auto text-start">Username</th>
                                 <th class="col-2 text-start">Role</th>
-                                <th class="col-1">Password</th>
+                                <th class="col-2">Password</th>
                                 <th class="col-1">Aksi</th>
                             </tr>
                         </thead>
@@ -91,13 +116,16 @@
                                 </tr>
                             @endif
 
-                            @foreach ($penggunas as $pengguna)
+                            @foreach ($data['penggunas'] as $pengguna)
                                 <tr class="text-center">
                                     <td>
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        <img src="{{ asset('img/avatars/' . $pengguna->avatar) }}" alt="avatar-{{ $pengguna->avatar }}" class="w-px-40 h-auto rounded-circle">
+                                        <div data-bs-toggle="modal" data-bs-target="#avatarModal" style="cursor: pointer;">
+                                            <img src="{{ asset((Str::contains($pengguna->avatar, 'custom-') ? 'storage/img/avatars/' . $pengguna->name . '/' : 'img/avatars/') . $pengguna->avatar) }}"
+                                                alt="avatar-{{ $pengguna->avatar }}" class="w-px-40 h-auto rounded-circle">
+                                        </div>
                                     </td>
                                     <td class="text-start" x-data>
                                         @if ($editFieldRowId == $pengguna->id . '-name')
@@ -114,13 +142,12 @@
                                             </div>
                                         @endif
                                     </td>
-
                                     <td class="text-start">
                                         @if ($editFieldRowId == $pengguna->id . '-id_role')
                                             <div class="d-flex justify-content-center">
                                                 <select wire:blur="ubah('{{ $pengguna->id }}', 'id_role', $event.target.value)"
                                                     wire:keydown.enter="ubah('{{ $pengguna->id }}', 'id_role', $event.target.value)" class="form-select form-select-sm">
-                                                    @foreach ($roles as $role)
+                                                    @foreach ($data['roles'] as $role)
                                                         <option value="{{ $role->id }}" {{ $pengguna->id_role === $role->id ? 'selected' : '' }}>
                                                             {{ ucfirst(str_replace('_', ' ', $role->role)) }}
                                                         </option>
@@ -136,13 +163,26 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button onclick="konfirmasiHapus({{ $pengguna->id }}, '{{ $pengguna->name }}')" type="button"
-                                                class="btn btn-sm btn-primary rounded-1"><strong>Reset</strong></button>
-                                        </div>
+                                        @if ($editFieldRowId == $pengguna->id . '-password')
+                                            <div class="d-flex justify-content-center">
+                                                <input type="text" class="form-control form-control-sm" wire:blur="ubah('{{ $pengguna->id }}', 'password', $event.target.value)"
+                                                    wire:keydown.enter="ubah('{{ $pengguna->id }}', 'password', $event.target.value)" value=""
+                                                    placeholder="Masukkan password baru..." @click.outside="$wire.set('editFieldRowId', null)" />
+                                            </div>
+                                        @else
+                                            {{-- Tombol reset --}}
+                                            <div>
+                                                <button type="button" class="btn btn-sm btn-primary rounded-1"
+                                                    wire:click="editRow('{{ $pengguna->id }}', 'password', '{{ $pengguna->password }}')">
+                                                    <strong>Reset</strong>
+                                                </button>
+                                            </div>
+                                        @endif
+
+
                                     </td>
                                     <td>
-                                        <div class="dropdown">
+                                        <div>
                                             <button onclick="konfirmasiHapus({{ $pengguna->id }}, '{{ $pengguna->name }}')" type="button"
                                                 class="btn btn-sm btn-danger rounded-1"><strong>Hapus</strong></button>
                                         </div>
@@ -155,7 +195,35 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true" wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="avatarModalLabel">Pilih Avatar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        @foreach ($data['avatars'] as $avatar)
+                            <img src="{{ asset('img/avatars/' . $avatar) }}" alt="avatar-{{ $avatar }}" class="rounded-circle border border-2 p-1 avatar-option"
+                                style="width:60px; cursor:pointer" wire:click="ubahAvatar('{{ $avatar }}')">
+                        @endforeach
+                        <span class="upload-plus avatar-option rounded-circle border border-2 bg-primary mt-2"
+                            style="display:inline-block; width:60px; height:60px; line-height:53px; text-align:center; cursor:pointer;"
+                            onclick="document.getElementById('customAvatar').click()">
+                            <i class="bx bx-plus fs-3 text-white" style="vertical-align:middle"></i>
+                        </span>
+                        <input type="file" id="customAvatar" wire:model="customAvatar" accept="image/*" hidden>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
 
 @push('js')
     <script>
@@ -177,6 +245,10 @@
                     icon: 'success',
                     title: message
                 });
+            });
+
+            window.Livewire.on('close_modal', function(message) {
+                $('#avatarModal').modal('hide');
             });
         });
 
