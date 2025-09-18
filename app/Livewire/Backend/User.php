@@ -4,6 +4,7 @@ namespace App\Livewire\Backend;
 
 use App\Models\Role as ModelRole;
 use App\Models\User as ModelUser;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -57,6 +58,12 @@ class User extends Component
         $this->index = ModelUser::count() + 1;
     }
 
+    public function selectUser($id)
+    {
+        $this->selectedUserId = $id;
+        $this->modeTambah = false;
+    }
+
     public function ubah($id, $field, $value)
     {
         $data = ModelUser::find($id);
@@ -102,14 +109,29 @@ class User extends Component
     {
         $this->validateOnly('customAvatar');
 
+        // dd($this->customAvatar);
         // Simpan file ke storage/public/img/avatars
-        $filename = 'custom-' . auth()->user()->name . '.' . $this->customAvatar->getClientOriginalExtension();
-        $this->customAvatar->storeAs('img/avatars/' . auth()->user()->name, $filename, 'public');
 
-        $data = ModelUser::find(auth()->user()->id);
-        $data->update([
-            'avatar' => $filename,
-        ]);
+        if ($this->selectedUserId) {
+            $data = ModelUser::find($this->selectedUserId);
+
+            $filename = 'custom-' . $data->name . '.' . $this->customAvatar->getClientOriginalExtension();
+            $this->customAvatar->storeAs('img/avatars/' . $data->name, $filename, 'public');
+            $data->update([
+                'avatar' => $filename,
+            ]);
+        } else {
+            $filename = 'custom-avatar' . (ModelUser::count() + 1) . '.' . $this->customAvatar->getClientOriginalExtension();
+            $this->customAvatar->storeAs('img/avatars/avatar/', $filename, 'public');
+            $this->avatarBaru = $filename;
+            // $this->dispatch('close_modal');
+            // return;
+        }
+
+        // $data = ModelUser::find(auth()->user()->id);
+        // $data->update([
+        //     'avatar' => $filename,
+        // ]);
 
         $this->dispatch('toast_success', 'Avatar berhasil diubah.');
         $this->dispatch('close_modal');
@@ -124,20 +146,50 @@ class User extends Component
         }
     }
 
+    // #[On('simpanPengguna')]
+    // public function simpan()
+    // {
+    //     $this->validate();
+
+    //     ModelUser::create([
+    //         'avatar' => $this->avatarBaru ?? '0.png',
+    //         'name' => $this->name,
+    //         'password' => Hash::make($this->name),
+    //         'id_role' => $this->role,
+    //     ]);
+
+    //     $this->dispatch('toast_success', 'User ' . $this->name . ' berhasil ditambahkan.');
+    //     $this->reset(['tampil_tambah', 'name', 'role']);
+    // }
+
     #[On('simpanPengguna')]
     public function simpan()
     {
         $this->validate();
 
+        // Default avatar
+        $avatarName = $this->avatarBaru ?? '0.png';
+
+        // Jika $this->avatarBaru mengandung kata 'avatar', ganti menjadi custom-namaUser.ext
+        if ($this->avatarBaru && Str::contains($this->avatarBaru, 'avatar')) {
+            $avatarName = 'custom-' . $this->name . '.' . $this->customAvatar->getClientOriginalExtension();
+
+            // Simpan file ke storage/public/img/avatars/namaUser/
+            $this->customAvatar->storeAs('public/img/avatars/' . $this->name, $avatarName);
+        }
+
+        // Buat user baru
         ModelUser::create([
-            'avatar' => $this->avatarBaru ?? '0.png',
+            'avatar' => $avatarName,
             'name' => $this->name,
             'password' => Hash::make($this->name),
             'id_role' => $this->role,
         ]);
 
         $this->dispatch('toast_success', 'User ' . $this->name . ' berhasil ditambahkan.');
-        $this->reset(['tampil_tambah', 'name', 'role']);
+
+        // Reset form dan tutup modal
+        $this->reset(['tampil_tambah', 'name', 'role', 'avatarBaru', 'customAvatar']);
     }
 
     #[On('hapusPengguna')]

@@ -69,7 +69,8 @@
                                     <td>{{ $index }}</td>
                                     <td>
                                         <div wire:click="$set('selectedUserId', null)" data-bs-toggle="modal" data-bs-target="#avatarModal" style="cursor: pointer;">
-                                            <img src="{{ asset('img/avatars/' . ($avatarBaru ?? '0.png')) }}" class="w-px-40 h-auto rounded-circle">
+                                            <img src="{{ Str::contains($avatarBaru, 'avatar') ? asset('storage/img/avatars/avatar/' . $avatarBaru) : asset('img/avatars/' . ($avatarBaru ?? '0.png')) }}"
+                                                class="w-px-40 h-auto rounded-circle">
                                         </div>
                                     </td>
                                     <td class="text-start">
@@ -126,8 +127,7 @@
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        <div wire:click="$set('selectedUserId', {{ $pengguna->id }}); $set('modeTambah', false)"
-                                            data-bs-toggle="modal"data-bs-target="#avatarModal" style="cursor: pointer;">
+                                        <div wire:click="selectUser({{ $pengguna->id }})" data-bs-toggle="modal" data-bs-target="#avatarModal" style="cursor: pointer;">
                                             <img src="{{ asset((Str::contains($pengguna->avatar, 'custom-') ? 'storage/img/avatars/' . $pengguna->name . '/' : 'img/avatars/') . $pengguna->avatar) }}"
                                                 alt="avatar-{{ $pengguna->avatar }}" class="w-px-40 h-auto rounded-circle">
                                         </div>
@@ -200,12 +200,12 @@
         </div>
     </div>
 
-    <div wire:ignore.self class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="avatarModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="avatarModalLabel">Pilih Avatar</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
