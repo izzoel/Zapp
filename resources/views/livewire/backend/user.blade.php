@@ -45,7 +45,7 @@
 <div>
     <h4 class="fw-bold py-3 mb-2">
         <span class="text-muted fw-light">Setting /</span>
-        {{ strtolower(Request::segment(1)) === 'livewire' ? $data['fallback'] : ucfirst(Request::segment(1)) }}
+        {{ strtolower(Request::segment(1)) === 'livewire' ? $fallback : ucfirst(Request::segment(1)) }}
         <button wire:click="tambah" type="button" class="btn btn-xs btn-primary rounded-1"><strong>&#10010;</strong></button>
     </h4>
     <div class="row">
@@ -67,7 +67,11 @@
                             @if ($tampil_tambah)
                                 <tr class="text-center" style="background-color: rgb(133 146 163 / 60%);">
                                     <td>{{ $index }}</td>
-                                    <td><img src="" alt=""></td>
+                                    <td>
+                                        <div wire:click="$set('selectedUserId', null)" data-bs-toggle="modal" data-bs-target="#avatarModal" style="cursor: pointer;">
+                                            <img src="{{ asset('img/avatars/' . ($avatarBaru ?? '0.png')) }}" class="w-px-40 h-auto rounded-circle">
+                                        </div>
+                                    </td>
                                     <td class="text-start">
                                         <input wire:model="name" type="text"
                                             class="form-control form-control-md {{ $errors->has('name') ? 'is-invalid' : 'border border-secondary' }}" placeholder="username..">
@@ -100,7 +104,7 @@
                                     </td>
                                     <td>
                                         <input wire:model="name" type="text"
-                                            class="form-control form-control-md {{ $errors->has('name') ? 'is-invalid' : 'border border-secondary' }}" placeholder="username..">
+                                            class="form-control form-control-md {{ $errors->has('name') ? 'is-invalid' : 'border border-secondary' }}" placeholder="password..">
 
                                         <div class="invalid-feedback">
                                             @error('name')
@@ -116,13 +120,14 @@
                                 </tr>
                             @endif
 
-                            @foreach ($data['penggunas'] as $pengguna)
+                            @foreach ($penggunas as $pengguna)
                                 <tr class="text-center">
                                     <td>
                                         {{ $loop->iteration }}
                                     </td>
                                     <td>
-                                        <div data-bs-toggle="modal" data-bs-target="#avatarModal" style="cursor: pointer;">
+                                        <div wire:click="$set('selectedUserId', {{ $pengguna->id }}); $set('modeTambah', false)"
+                                            data-bs-toggle="modal"data-bs-target="#avatarModal" style="cursor: pointer;">
                                             <img src="{{ asset((Str::contains($pengguna->avatar, 'custom-') ? 'storage/img/avatars/' . $pengguna->name . '/' : 'img/avatars/') . $pengguna->avatar) }}"
                                                 alt="avatar-{{ $pengguna->avatar }}" class="w-px-40 h-auto rounded-circle">
                                         </div>
@@ -147,7 +152,7 @@
                                             <div class="d-flex justify-content-center">
                                                 <select wire:blur="ubah('{{ $pengguna->id }}', 'id_role', $event.target.value)"
                                                     wire:keydown.enter="ubah('{{ $pengguna->id }}', 'id_role', $event.target.value)" class="form-select form-select-sm">
-                                                    @foreach ($data['roles'] as $role)
+                                                    @foreach ($roles as $role)
                                                         <option value="{{ $role->id }}" {{ $pengguna->id_role === $role->id ? 'selected' : '' }}>
                                                             {{ ucfirst(str_replace('_', ' ', $role->role)) }}
                                                         </option>
@@ -170,7 +175,6 @@
                                                     placeholder="Masukkan password baru..." @click.outside="$wire.set('editFieldRowId', null)" />
                                             </div>
                                         @else
-                                            {{-- Tombol reset --}}
                                             <div>
                                                 <button type="button" class="btn btn-sm btn-primary rounded-1"
                                                     wire:click="editRow('{{ $pengguna->id }}', 'password', '{{ $pengguna->password }}')">
@@ -196,7 +200,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true" wire:ignore.self>
+    <div wire:ignore.self class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -205,9 +209,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        @foreach ($data['avatars'] as $avatar)
-                            <img src="{{ asset('img/avatars/' . $avatar) }}" alt="avatar-{{ $avatar }}" class="rounded-circle border border-2 p-1 avatar-option"
-                                style="width:60px; cursor:pointer" wire:click="ubahAvatar('{{ $avatar }}')">
+                        @foreach ($avatars as $avatar)
+                            <img wire:click="ubahAvatar('{{ $avatar }}')" src="{{ asset('img/avatars/' . $avatar) }}" alt="avatar-{{ $avatar }}"
+                                class="rounded-circle border border-2 p-1 avatar-option" style="width:60px; cursor:pointer">
                         @endforeach
                         <span class="upload-plus avatar-option rounded-circle border border-2 bg-primary mt-2"
                             style="display:inline-block; width:60px; height:60px; line-height:53px; text-align:center; cursor:pointer;"
@@ -227,6 +231,10 @@
 
 @push('js')
     <script>
+        document.addEventListener('show.bs.modal', function(e) {
+            $('.modal-backdrop').remove();
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             window.Livewire.on('toast_success', function(message) {
                 const Toast = Swal.mixin({

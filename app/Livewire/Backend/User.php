@@ -14,7 +14,8 @@ class User extends Component
 {
     use WithFileUploads;
 
-    public $editFieldRowId, $customAvatar;
+    public $editFieldRowId, $customAvatar, $avatarBaru, $selectedUserId;
+    public $modeTambah = false;
     public $index, $fallback, $avatars, $name, $role;
 
     public bool $tampil_tambah = false;
@@ -22,25 +23,32 @@ class User extends Component
     protected $rules = [
         'name' => 'required',
         'role' => 'required',
+        'customAvatar' => 'nullable|image|max:2048',
     ];
 
     protected $messages = [
         'name.required' => 'Harus diisi.',
         'role.required' => 'Pilih role.',
+        'customAvatar.image' => 'File harus berupa gambar (jpeg, png, dll).',
+        'customAvatar.max' => 'Ukuran gambar maksimal 2 MB.',
     ];
+
+    public function mount()
+    {
+        $this->fallback = class_basename(ModelUser::class);
+        for ($i = 0; $i <= 9; $i++) {
+            $this->avatars[] = $i . '.png';
+        }
+    }
 
     public function render()
     {
-        $data['avatars'] = [];
-        $data['fallback'] = class_basename(ModelUser::class);
+        $data['avatars'] = $this->avatars;
+        $data['fallback'] = $this->fallback;
         $data['penggunas'] = ModelUser::all();
         $data['roles'] = ModelRole::all();
 
-        for ($i = 0; $i <= 9; $i++) {
-            $data['avatars'][] = $i + 1 . '.png';
-        }
-
-        return view('livewire.backend.user', compact('data'));
+        return view('livewire.backend.user', $data);
     }
 
     public function tambah()
@@ -75,10 +83,16 @@ class User extends Component
 
     public function ubahAvatar($avatar)
     {
-        $data = ModelUser::find(auth()->user()->id);
-        $data->update([
-            'avatar' => $avatar,
-        ]);
+        if ($this->selectedUserId) {
+            $data = ModelUser::find($this->selectedUserId);
+            $data->update([
+                'avatar' => $avatar,
+            ]);
+        } else {
+            $this->avatarBaru = $avatar;
+            $this->dispatch('close_modal');
+            return;
+        }
 
         $this->dispatch('toast_success', 'Avatar berhasil diubah.');
         $this->dispatch('close_modal');
@@ -86,9 +100,7 @@ class User extends Component
 
     public function updatedCustomAvatar()
     {
-        $this->validate([
-            'customAvatar' => 'required|image|max:2048',
-        ]);
+        $this->validateOnly('customAvatar');
 
         // Simpan file ke storage/public/img/avatars
         $filename = 'custom-' . auth()->user()->name . '.' . $this->customAvatar->getClientOriginalExtension();
@@ -116,10 +128,12 @@ class User extends Component
     public function simpan()
     {
         $this->validate();
+
         ModelUser::create([
+            'avatar' => $this->avatarBaru ?? '0.png',
             'name' => $this->name,
             'password' => Hash::make($this->name),
-            'role' => $this->id_role,
+            'id_role' => $this->role,
         ]);
 
         $this->dispatch('toast_success', 'User ' . $this->name . ' berhasil ditambahkan.');
